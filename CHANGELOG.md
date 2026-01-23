@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Checksum-Based Binary Authorization** - New Sentinel policy for artifact integrity verification in `nomad-sentinel-policy` module
+  - `artifact-checksum-authorization` Sentinel policy validates artifacts have approved SHA256 checksums
+  - Checksums manifest stored in GCS at `security/approved-checksums.json` with IAM-protected access
+  - Configurable enforcement levels: `hard-mandatory`, `soft-mandatory`, or `advisory`
+  - `require_artifact_checksum` variable to enforce checksums on all artifacts (default: true)
+  - `additional_approved_checksums` variable for adding checksums from CI/CD pipelines
+  - `checksums_admin_members` variable for IAM control over checksums manifest
+  - Pre-calculated checksums for all module-managed artifacts (config.json, approved-script.sh, app-config.yaml)
+  - New `checksums.tf` file containing checksum management resources and Sentinel policy
+  - Comprehensive test jobs for checksum validation:
+    - `checksum-approved.nomad` - Tests approved checksum (PASS)
+    - `checksum-unapproved.nomad` - Tests unapproved checksum (FAIL)
+    - `checksum-missing.nomad` - Tests missing checksum (FAIL)
+    - `checksum-invalid-format.nomad` - Tests malformed checksum (FAIL)
+    - `checksum-multi-artifact.nomad` - Tests multiple artifacts with approved checksums (PASS)
+  - New outputs: `approved_checksums`, `approved_checksums_manifest_url`, `checksum_policy_name`
+- **Nomad Sentinel Policy Module** - New `nomad-sentinel-policy` module for enforcing artifact source restrictions
+  - Sentinel policy (`restrict-artifact-sources`) validates all job artifacts come from approved URL prefixes
+  - Hard-mandatory enforcement rejects jobs with unapproved artifact sources at submission time
+  - GCS bucket creation for storing approved artifacts with public read access
+  - Configurable allowed artifact prefixes (defaults to GCS bucket URL)
+  - Pre-uploaded artifacts: executable script, JSON config, YAML config
+  - Test job templates for validating policy behavior (approved, unapproved, mixed, no-artifacts)
+  - Comprehensive module README with architecture diagram, usage examples, and troubleshooting guide
+  - Module path: `tf/modules/nomad-sentinel-policy`
 - **Nomad ACL Support** - Nomad clusters now deploy with ACLs enabled by default
   - ACL system enabled in Nomad server and client configurations (`acl { enabled = true }`)
   - Automatic ACL bootstrap during Terraform apply with token capture
@@ -94,6 +119,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-datacenter support with primary and secondary cluster deployments
 
 ### Changed
+- **Nomad Sentinel Policy Module - Artifact URL Format** - Updated artifact source URL format for proper GCS authentication
+  - Changed from `https://storage.googleapis.com/` to `gcs::https://www.googleapis.com/storage/v1/` format
+  - Enables go-getter to use GCS authentication via service account credentials
+  - Updated all `.nomad` test job files to use the new URL format
+- **Nomad Sentinel Policy Module - Field Name Fix** - Fixed Sentinel policy field names for artifact inspection
+  - Changed `artifact.source` to `artifact.getter_source` (Sentinel uses snake_case naming convention)
+  - Changed `artifact.options` to `artifact.getter_options` for checksum extraction
+  - Fixes "artifact with no source defined" errors when evaluating policies
 - **Nomad-Consul Setup Dependency Order** - Reordered resource dependencies for proper ACL token handling
   - `nomad_acl_bootstrap` now runs before `nomad_consul_setup`
   - `nomad_consul_setup` and `secondary_nomad_consul_setup` now include `NOMAD_TOKEN` environment variable
@@ -162,6 +195,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README.md to reflect `gke-consul-dataplane` scenario implementation status
 
 ### Documentation
+- **Nomad Sentinel Policy Module README Overhaul** - Comprehensive documentation update
+  - Added Binary Authorization section with architecture diagrams and CI/CD integration examples
+  - Merged OBSERVABILITY.md content into module README for unified documentation
+  - Added new Inputs table entries for all checksum-related variables
+  - Added new Outputs table entries for checksum-related outputs
+  - Added Checksum Authorization Tests section with all test job descriptions
+  - Added CI/CD Integration section with Cloud Build example configuration
+  - Added Security Considerations section with binary authorization guarantees table
+  - Added IAM Best Practices section with example configurations
+  - Added Troubleshooting section for checksum-related issues
+  - Added Observability Stack Integration section with Mermaid architecture diagram
+  - Added Collector Pipeline architecture diagram
+  - Added LogQL query examples for artifact-related log searches
 - Added comprehensive "Task Commands and Scenarios" section to README.md explaining:
   - How the Taskfile scenario-based deployment system works
   - Detailed reference for all task commands organized by category

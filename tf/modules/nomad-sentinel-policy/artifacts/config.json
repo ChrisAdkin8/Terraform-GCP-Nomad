@@ -1,0 +1,14 @@
+{
+  "app_name": "sentinel-test-app",
+  "version": "1.0.0",
+  "environment": "test",
+  "settings": {
+    "log_level": "info",
+    "max_retries": 3,
+    "timeout_seconds": 30
+  },
+  "features": {
+    "sentinel_validation": true,
+    "artifact_verification": true
+  }
+}
