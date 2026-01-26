@@ -23,7 +23,7 @@ The module also creates a GCS bucket for storing approved artifacts with proper 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              Job Submission Flow                                 │
+│                              Job Submission Flow                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │   ┌──────────────┐                                                              │
@@ -40,9 +40,9 @@ The module also creates a GCS bucket for storing approved artifacts with proper 
 │   │   │  restrict-artifact-     │     │  artifact-checksum-             │   │   │
 │   │   │  sources                │     │  authorization                  │   │   │
 │   │   │                         │     │                                 │   │   │
-│   │   │  • Check URL prefixes   │     │  • Verify checksum present     │   │   │
-│   │   │  • Allow approved       │     │  • Validate checksum format    │   │   │
-│   │   │    sources only         │     │  • Check against approved list │   │   │
+│   │   │  • Check URL prefixes   │     │  • Verify checksum present      │   │   │
+│   │   │  • Allow approved       │     │  • Validate checksum format     │   │   │
+│   │   │    sources only         │     │  • Check against approved list  │   │   │
 │   │   └───────────┬─────────────┘     └────────────────┬────────────────┘   │   │
 │   │               │                                    │                    │   │
 │   │               └──────────────┬─────────────────────┘                    │   │
